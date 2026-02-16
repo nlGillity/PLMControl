@@ -14,13 +14,6 @@ class SCPIInstrument:
         
         self.name = name  # название прибора
         self.isInitialized = bool()  # флаг инициализации
-        self.state = {
-            "voltage": 0.0,
-            "current": 0.0,
-            "power": 0.0,
-            "output": 0,
-            "remote": 0
-        }
         try:
             if connection_type == 'TCPIP':  # Первый способ установки соединения с прибором
                 self.instrument = rm.open_resource(f'TCPIP::{ip}::inst0::INSTR')
@@ -55,7 +48,6 @@ class SCPIInstrument:
         """
         try:
             self._query(f'VOLTAGE {value}')
-            self.state["voltage"] = value
         except Exception:
             pass
 
@@ -65,7 +57,6 @@ class SCPIInstrument:
         """
         try:
             self._query(f'CURRENT {value}')
-            self.state["current"] = value
         except Exception:
             pass
 
@@ -75,7 +66,6 @@ class SCPIInstrument:
         """
         try:
             self._query(f'POWER {value}')
-            self.state["power"] = value
         except Exception:
             pass
 
@@ -130,7 +120,6 @@ class SCPIInstrument:
         """
         try:
             self._query('OUTPUT ON')
-            self.state["output"] = 1
         except Exception:
             print(f'{self.name}: Cannot set output to on')
 
@@ -140,7 +129,6 @@ class SCPIInstrument:
         """
         try:
             self._query('OUTPUT OFF')
-            self.state["output"] = 0
         except Exception:
             print(f'{self.name}: Cannot set output to off')
 
@@ -150,7 +138,6 @@ class SCPIInstrument:
         """
         try:
             self._query('SYSTEM:LOCAL')
-            self.state["remote"] = 0
         except Exception:
             print(f'{self.name}: Cannot set device to local mode')
 
@@ -161,7 +148,6 @@ class SCPIInstrument:
         """
         try:
             self._query('SYSTEM:REMOTE')
-            self.state["remote"] = 1
         except Exception:
             print(f'{self.name}: Cannot set device to remote mode')
     

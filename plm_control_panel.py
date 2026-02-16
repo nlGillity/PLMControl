@@ -175,29 +175,9 @@ class PLMControl(QtWidgets.QMainWindow):
 
         self.start_db_writing = False
         
-        self.power_devices_state = {}
-        self.is_state_restored = False
-        
-        if os.path.isfile('state.json'):
-            msg = QtWidgets.QMessageBox()
-            msg.setText('Похоже, предыдущий сеанс закончился некорректно. Вы хотите восстановить предыдущее состояние программы?')
-            msg.setWindowTitle('Подтверждение')
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-            return_value = msg.exec()
-            if return_value == QtWidgets.QMessageBox.Ok:
-                self.is_state_restored = True
-            if return_value == QtWidgets.QMessageBox.Cancel:
-                pass
-            else:
-                f = open('state.json', 'w')
-                f.close()
-        
         self._init_ui()
         self._init_writing_routine()
         self._init_instrument_ui()
-        
-        if self.is_state_restored:
-            self._restore_state()
 
         # Последующая инициализация всех устройств происходит в
         # self._init_main(), вызываемой после закрытия начального окна    
@@ -275,11 +255,6 @@ class PLMControl(QtWidgets.QMainWindow):
     def __del__(self):
         self.reading_thread.terminate()
 
-    def _restore_state(self):
-        with open('state.json', 'r') as file:
-            state = json.load(file)
-        pass
-        
     def _init_main(self) -> None:
         self._init_settings()
         self._init_instruments()
@@ -491,42 +466,22 @@ class PLMControl(QtWidgets.QMainWindow):
         print("Establishing connection with sensors...")
         self.rm = pyvisa.ResourceManager()
         self.sample = SCPIInstrument(self.rm, self.sample_connect, self.sample_ip, 5025, name='Sample')
-        if self.is_state_restored:
-            self.sample.state = self.power_devices_state[self.sample.name]
-        else:
-            self.power_devices_state.update({self.sample.name}: self.sample.state)
         if not self.sample.isInitialized:
             self.ui_main.check_remote_sample.setDisabled(True)
 
         self.discharge = SCPIInstrument(self.rm, self.discharge_connect, self.discharge_ip, 0, name='Discharge')
-        if self.is_state_restored:
-            self.discharge.state = self.power_devices_state[self.discharge.name]
-        else:
-            self.power_devices_state.update({self.discharge.name}: self.discharge.state)
         if not self.discharge.isInitialized:
             self.ui_main.check_remote_discharge.setDisabled(True)
 
         self.solenoid_1 = SCPIInstrument(self.rm, self.solenoid_connect, self.solenoid_ip, 5025, name='Solenoid')
-        if self.is_state_restored:
-            self.solenoid_1.state = self.power_devices_state[self.solenoid_1.name]
-        else:
-            self.power_devices_state.update({self.solenoid_1.name}: self.solenoid_1.state)
         if not self.solenoid_1.isInitialized:
             self.ui_main.check_remote_solenoid_1.setDisabled(True)
 
         self.solenoid_2 = SCPIInstrument(self.rm, self.solenoid_connect_2, self.solenoid_ip_2, 0, name='Solenoid 2')
-        if self.is_state_restored:
-            self.solenoid_2.state = self.power_devices_state[self.solenoid_2.name]
-        else:
-            self.power_devices_state.update({self.solenoid_2.name}: self.solenoid_2.state)
         if not self.solenoid_2.isInitialized:
             self.ui_main.check_remote_solenoid_2.setDisabled(True)
 
         self.cathode = SCPIInstrument(self.rm, self.cathode_connect, self.cathode_ip, 0, name='Cathode')
-        if self.is_state_restored:
-            self.cathode.state = self.power_devices_state[self.cathode.name]
-        else:
-            self.power_devices_state.update({self.cathode.name}: self.cathode.state)
         if not self.cathode.isInitialized:
             self.ui_main.check_remote_cathode.setDisabled(True)
 
@@ -773,7 +728,7 @@ class PLMControl(QtWidgets.QMainWindow):
     def solenoid_2_remote_stop(self):
         if self.ui_main.solenoid_stop_2.isChecked():
             self.ui_main.solenoid_start_2.setChecked(False)
-            self.ui_main.solenoid_start_2.setDisabled(True)
+            self.ui_main.solenoid_start_2.setDisabled(False)
             self.solenoid_2.set_output_off()
 
     def cathode_local(self):
@@ -987,15 +942,3 @@ class PLMControl(QtWidgets.QMainWindow):
         self.pressure_1.set_gas(gas)
         self.pressure_2.set_gas(gas)
         self.pressure_3.set_gas(gas)
-
-    def closeEvent(self, event):
-        msg = QtWidgets.QMessageBox()
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-        msg.setText('Закрыть окно? Состояние программы не будет сохранено')
-        msg.setWindowTitle('Подтверждение')
-        return_value = msg.exec()
-        if return_value == QtWidgets.QMessageBox.Ok:
-            print('OK')
-            os.remove('test.json')
-        if return_value == QtWidgets.QMessageBox.Cancel:
-            event.ignore()
