@@ -278,103 +278,8 @@ class PLMControl(QtWidgets.QMainWindow):
     def _restore_state(self):
         with open('state.json', 'r') as file:
             state = json.load(file)
-
-        # Sample state restoration
-        self.ui_main.set_i_sample.setValue(state[self.sample.name]["current"])
-        self.ui_main.set_i_sample_slider.setValue(state[self.sample.name]["current"])
-        self.ui_main.set_u_sample.setValue(state[self.sample.name]["voltage"])
-        self.ui_main.set_u_sample_slider.setValue(state[self.sample.name]["voltage"])
-        if state[self.sample.name]["output"]:
-            self.ui_main.sample_stop.setChecked(False)
-            self.ui_main.sample_start.setChecked(True)
-        else:
-            self.ui_main.sample_stop.setChecked(True)
-            self.ui_main.sample_start.setChecked(False)
-        if state[self.sample.name]["remote"]:
-            self.ui_main.check_local_sample.setChecked(False)
-            self.ui_main.check_remote_sample.setChecked(True)
-        else:
-            self.ui_main.check_local_sample.setChecked(True)
-            self.ui_main.check_remote_sample.setChecked(False)
-
-        # Discharge state restoration
-        self.ui_main.set_i_discharge.setValue(state[self.discharge.name]["current"])
-        self.ui_main.set_i_discharge_slider.setValue(state[self.discharge.name]["current"])
-        self.ui_main.set_u_discharge.setValue(state[self.discharge.name]["voltage"])
-        self.ui_main.set_u_discharge_slider.setValue(state[self.discharge.name]["voltage"])
-        self.ui_main.set_p_discharge.setValue(state[self.discharge.name]["power"])
-        self.ui_main.set_p_discharge_slider.setValue(state[self.discharge.name]["power"])
-        if state[self.discharge.name]["output"]:
-            self.ui_main.discharge_stop.setChecked(False)
-            self.ui_main.discharge_start.setChecked(True)
-        else:
-            self.ui_main.discharge_stop.setChecked(True)
-            self.ui_main.discharge_start.setChecked(False)
-        if state[self.discharge.name]["remote"]:
-            self.ui_main.check_local_discharge.setChecked(False)
-            self.ui_main.check_remote_discharge.setChecked(True)
-        else:
-            self.ui_main.check_local_discharge.setChecked(True)
-            self.ui_main.check_remote_discharge.setChecked(False)
+        pass
         
-        # Solenoid_1 state restoration
-        self.ui_main.set_i_solenoid_1.setValue(state[self.solenoid_1.name]["current"])
-        self.ui_main.set_i_solenoid_slider_1.setValue(state[self.solenoid_1.name]["current"])
-        self.ui_main.set_u_solenoid_1.setValue(state[self.solenoid_1.name]["voltage"])
-        self.ui_main.set_u_solenoid_slider_1.setValue(state[self.solenoid_1.name]["voltage"])
-        if state[self.solenoid_1.name]["output"]:
-            self.ui_main.solenoid_stop_1.setChecked(False)
-            self.ui_main.solenoid_start_1.setChecked(True)
-        else:
-            self.ui_main.solenoid_stop_1.setChecked(True)
-            self.ui_main.solenoid_start_1.setChecked(False)
-        if state[self.solenoid_1.name]["remote"]:
-            self.ui_main.check_local_solenoid_1.setChecked(False)
-            self.ui_main.check_remote_solenoid_1.setChecked(True)
-        else:
-            self.ui_main.check_local_solenoid_1.setChecked(True)
-            self.ui_main.check_remote_solenoid_1.setChecked(False)
-        
-        # Solenoid_2 state restoration
-        self.ui_main.set_i_solenoid_2.setValue(state[self.solenoid_2.name]["current"])
-        self.ui_main.set_i_solenoid_slider_2.setValue(state[self.solenoid_2.name]["current"])
-        self.ui_main.set_u_solenoid_2.setValue(state[self.solenoid_2.name]["voltage"])
-        self.ui_main.set_u_solenoid_slider_2.setValue(state[self.solenoid_2.name]["voltage"])
-        self.ui_main.set_p_solenoid_2.setValue(state[self.solenoid_2.name]["power"])
-        self.ui_main.set_p_solenoid_slider_2.setValue(state[self.solenoid_2.name]["power"])
-        if state[self.solenoid_2.name]["output"]:
-            self.ui_main.solenoid_stop_2.setChecked(False)
-            self.ui_main.solenoid_start_2.setChecked(True)
-        else:
-            self.ui_main.solenoid_stop_2.setChecked(True)
-            self.ui_main.solenoid_start_2.setChecked(False)
-        if state[self.solenoid_2.name]["remote"]:
-            self.ui_main.check_local_solenoid_2.setChecked(False)
-            self.ui_main.check_remote_solenoid_2.setChecked(True)
-        else:
-            self.ui_main.check_local_solenoid_2.setChecked(True)
-            self.ui_main.check_remote_solenoid_2.setChecked(False)
-        
-        # Cathode state restoration
-        self.ui_main.set_i_cathode.setValue(state[self.cathode.name]["current"])
-        self.ui_main.set_i_cathode_slider.setValue(state[self.cathode.name]["current"])
-        self.ui_main.set_u_cathode.setValue(state[self.cathode.name]["voltage"])
-        self.ui_main.set_u_cathode_slider.setValue(state[self.cathode.name]["voltage"])
-        self.ui_main.set_p_cathode.setValue(state[self.cathode.name]["power"])
-        self.ui_main.set_p_cathode_slider.setValue(state[self.cathode.name]["power"])
-        if state[self.cathode.name]["output"]:
-            self.ui_main.cathode_stop.setChecked(False)
-            self.ui_main.cathode_start.setChecked(True)
-        else:
-            self.ui_main.cathode_stop.setChecked(True)
-            self.ui_main.cathode_start.setChecked(False)
-        if state[self.cathode.name]["remote"]:
-            self.ui_main.check_local_cathode.setChecked(False)
-            self.ui_main.check_remote_cathode.setChecked(True)
-        else:
-            self.ui_main.check_local_cathode.setChecked(True)
-            self.ui_main.check_remote_cathode.setChecked(False)
-
     def _init_main(self) -> None:
         self._init_settings()
         self._init_instruments()
@@ -589,7 +494,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if self.is_state_restored:
             self.sample.state = self.power_devices_state[self.sample.name]
         else:
-            self.power_devices_state.update({self.sample.name: self.sample.state})
+            self.power_devices_state.update({self.sample.name}: self.sample.state)
         if not self.sample.isInitialized:
             self.ui_main.check_remote_sample.setDisabled(True)
 
@@ -597,7 +502,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if self.is_state_restored:
             self.discharge.state = self.power_devices_state[self.discharge.name]
         else:
-            self.power_devices_state.update({self.discharge.name: self.discharge.state})
+            self.power_devices_state.update({self.discharge.name}: self.discharge.state)
         if not self.discharge.isInitialized:
             self.ui_main.check_remote_discharge.setDisabled(True)
 
@@ -605,7 +510,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if self.is_state_restored:
             self.solenoid_1.state = self.power_devices_state[self.solenoid_1.name]
         else:
-            self.power_devices_state.update({self.solenoid_1.name: self.solenoid_1.state})
+            self.power_devices_state.update({self.solenoid_1.name}: self.solenoid_1.state)
         if not self.solenoid_1.isInitialized:
             self.ui_main.check_remote_solenoid_1.setDisabled(True)
 
@@ -613,7 +518,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if self.is_state_restored:
             self.solenoid_2.state = self.power_devices_state[self.solenoid_2.name]
         else:
-            self.power_devices_state.update({self.solenoid_2.name: self.solenoid_2.state})
+            self.power_devices_state.update({self.solenoid_2.name}: self.solenoid_2.state)
         if not self.solenoid_2.isInitialized:
             self.ui_main.check_remote_solenoid_2.setDisabled(True)
 
@@ -621,7 +526,7 @@ class PLMControl(QtWidgets.QMainWindow):
         if self.is_state_restored:
             self.cathode.state = self.power_devices_state[self.cathode.name]
         else:
-            self.power_devices_state.update({self.cathode.name: self.cathode.state})
+            self.power_devices_state.update({self.cathode.name}: self.cathode.state)
         if not self.cathode.isInitialized:
             self.ui_main.check_remote_cathode.setDisabled(True)
 
