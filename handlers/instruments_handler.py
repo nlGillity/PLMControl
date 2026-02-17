@@ -35,9 +35,7 @@ class SCPIInstrument:
         Обёртка над вызовом SCPI комманд
         """
         try:
-            self.instrument.lock()
             response = self.instrument.query(command)
-            self.instrument.unlock()
             return response
         except Exception as e:
             raise ValueError(e) # временное error propagation

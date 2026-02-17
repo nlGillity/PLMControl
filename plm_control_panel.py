@@ -121,33 +121,81 @@ class Reader(QtCore.QObject):
             deadline = datetime.now() + delay 
             instrument_data   = {}
             thermocouple_data = {}
-            
+    
             # ----------------------- Publish the data --------------------------------
-            start_sample = time.perf_counter()
-            instrument_data.update({"sample_current": self.sample.get_current()})
-            instrument_data.update({"sample_voltage": self.sample.get_voltage()})
-            instrument_data.update({"discharge_current": self.discharge.get_current()})
-            instrument_data.update({"discharge_voltage": self.discharge.get_voltage()})
-            instrument_data.update({"discharge_power": self.discharge.get_power()})
-            instrument_data.update({"solenoid_current_1": self.solenoid_1.get_current()})
-            instrument_data.update({"solenoid_voltage_1": self.solenoid_1.get_voltage()})
-            instrument_data.update({"solenoid_current_2": self.solenoid_2.get_current()})
-            instrument_data.update({"solenoid_voltage_2": self.solenoid_2.get_voltage()})
-            instrument_data.update({"solenoid_power_2": self.solenoid_2.get_power()})
-            instrument_data.update({"cathode_current": self.cathode.get_current()})
-            instrument_data.update({"cathode_voltage": self.cathode.get_voltage()})
-            instrument_data.update({"cathode_power": self.cathode.get_power()})
-            instrument_data.update({"T_cathode"          : calc_cathode_temp(
-                                                                    voltage = self.cathode.get_voltage(), 
-                                                                    current = self.cathode.get_current(), 
-                                                                    k       = self.k)})
-            instrument_data.update({"rrg_value": self.rrg.get_flow_inlet()})
-            instrument_data.update({"pressure_1": self.pressure_1.return_value()})
-            instrument_data.update({"pressure_2": self.pressure_2.return_value()})
-            instrument_data.update({"pressure_3": self.pressure_3.return_value()})
-            thermocouple_data_raw = self.thermocouple.read_thermocouple()
-            for i in range(len(thermocouple_data_raw)):
-                thermocouple_data.update({f"CH{i}": thermocouple_data_raw[i]})
+            if self.sample.IsInitialized:
+                instrument_data.update({"sample_current": self.sample.get_current()})
+                instrument_data.update({"sample_voltage": self.sample.get_voltage()})
+            else:
+                instrument_data.update({"sample_current": 0})
+                instrument_data.update({"sample_voltage": 0})
+
+            if self.discharge.IsInitialized:
+                instrument_data.update({"discharge_current": self.discharge.get_current()})
+                instrument_data.update({"discharge_voltage": self.discharge.get_voltage()})
+                instrument_data.update({"discharge_power": self.discharge.get_power()})
+            else:
+                instrument_data.update({"discharge_current": 0})
+                instrument_data.update({"discharge_voltage": 0})
+                instrument_data.update({"discharge_power": 0})
+
+            if self.solenoid_1.IsInitialized:
+                instrument_data.update({"solenoid_current_1": self.solenoid_1.get_current()})
+                instrument_data.update({"solenoid_voltage_1": self.solenoid_1.get_voltage()})
+            else:
+                instrument_data.update({"solenoid_current_1": 0})
+                instrument_data.update({"solenoid_voltage_1": 0})
+
+            if self.solenoid_2.IsInitialized:
+                instrument_data.update({"solenoid_current_2": self.solenoid_2.get_current()})
+                instrument_data.update({"solenoid_voltage_2": self.solenoid_2.get_voltage()})
+                instrument_data.update({"solenoid_power_2": self.solenoid_2.get_power()})
+            else:
+                instrument_data.update({"solenoid_current_2": 0})
+                instrument_data.update({"solenoid_voltage_2": 0})
+                instrument_data.update({"solenoid_power_2": 0})
+
+            if self.cathode.IsInitialized:
+                instrument_data.update({"cathode_current": self.cathode.get_current()})
+                instrument_data.update({"cathode_voltage": self.cathode.get_voltage()})
+                instrument_data.update({"cathode_power": self.cathode.get_power()})
+                instrument_data.update({"T_cathode"          : calc_cathode_temp(
+                                                                        voltage = self.cathode.get_voltage(), 
+                                                                        current = self.cathode.get_current(), 
+                                                                        k       = self.k)})
+            else:
+                instrument_data.update({"cathode_current": 0})
+                instrument_data.update({"cathode_voltage": 0})
+                instrument_data.update({"cathode_power": 0})
+                instrument_data.update({"T_cathode": 0})
+            
+            if self.rrg.isInitialized:
+                instrument_data.update({"rrg_value": self.rrg.get_flow_inlet()})
+            else:
+                instrument_data.update({"rrg_value": 0})
+
+            if self.pressure_1.isInitialized:
+                instrument_data.update({"pressure_1": self.pressure_1.return_value()})
+            else:
+                instrument_data.update({"pressure_1": 0})
+
+            if self.pressure_2.isInitialized:
+                instrument_data.update({"pressure_2": self.pressure_2.return_value()})
+            else:
+                instrument_data.update({"pressure_2": 0})
+
+            if self.pressure_3.isInitialized:
+                instrument_data.update({"pressure_3": self.pressure_3.return_value()})
+            else:
+                instrument_data.update({"pressure_3": self.pressure_3.return_value()})
+
+            if self.thermocouple.isInitialized:
+                thermocouple_data_raw = self.thermocouple.read_thermocouple()
+                for i in range(len(thermocouple_data_raw)):
+                    thermocouple_data.update({f"CH{i}": thermocouple_data_raw[i]})
+            else:
+                for i in range(self.thermocouple.thermocouple_ch_end - self.thermocouple.thermocouple_ch_start):
+                    thermocouple_data.update({f"CH{i}": thermocouple_data_raw[i]})
         
             timestamp = datetime.now().timestamp()
             self.reader_result.emit(instrument_data, thermocouple_data, timestamp)
@@ -163,8 +211,8 @@ class Reader(QtCore.QObject):
             self.client.publish(timestamp, "timestamp")
 
             self.client.disconnect()
-            # if datetime.now() < deadline:
-            #     pass
+            if datetime.now() < deadline:
+                pass
             end = time.perf_counter()
             print(f"Target reader cycle: {round(float(self.read_interval*1e-3), 2)}, got {end - start}")
 
