@@ -222,7 +222,7 @@ class PLMControl(QtWidgets.QMainWindow):
         QtWidgets.QMainWindow.__init__(self)
 
         self.start_db_writing = False
-        
+
         self._init_ui()
         self._init_writing_routine()
         self._init_instrument_ui()
@@ -302,6 +302,43 @@ class PLMControl(QtWidgets.QMainWindow):
 
     def __del__(self):
         self.reading_thread.terminate()
+    
+    def restore_state(self):
+        with open("state.json", "r") as f:
+            state = json.load(f)
+        self.ui_main.set_u_sample.setValue(state["sample_voltage"])
+        self.ui_main.set_u_sample_slider.setValue(state["sample_voltage"])
+        self.ui_main.set_i_sample.setValue(state["sample_current"])
+        self.ui_main.set_i_sample_slider.setValue(state["sample_current"])
+
+        self.ui_main.set_u_discharge.setValue(state["discharge_voltage"])
+        self.ui_main.set_u_discharge_slider.setValue(state["discharge_voltage"])
+        self.ui_main.set_i_discharge.setValue(state["discharge_current"])
+        self.ui_main.set_i_discharge_slider.setValue(state["discharge_current"])
+        self.ui_main.set_p_discharge.setValue(state["discharge_power"])
+        self.ui_main.set_p_discharge_slider.setValue(state["discharge_power"])
+
+        self.ui_main.set_u_solenoid_1.setValue(state["solenoid_voltage_1"])
+        self.ui_main.set_u_solenoid_slider_1.setValue(state["solenoid_voltage_1"])
+        self.ui_main.set_i_solenoid_1.setValue(state["solenoid_current_1"])
+        self.ui_main.set_i_solenoid_slider_1.setValue(state["solenoid_current_1"])
+        
+        self.ui_main.set_u_solenoid_2.setValue(state["solenoid_voltage_2"])
+        self.ui_main.set_u_solenoid_slider_2.setValue(state["solenoid_voltage_2"])
+        self.ui_main.set_i_solenoid_2.setValue(state["solenoid_current_2"])
+        self.ui_main.set_i_solenoid_slider_2.setValue(state["solenoid_current_2"])
+        self.ui_main.set_p_solenoid_2.setValue(state["solenoid_power_2"])
+        self.ui_main.set_p_solenoid_slider_2.setValue(state["solenoid_power_2"])
+
+        self.ui_main.set_u_cathode.setValue(state["cathode_voltage"])
+        self.ui_main.set_u_cathode_slider.setValue(state["cathode_voltage"])
+        self.ui_main.set_i_cathode.setValue(state["cathode_current"])
+        self.ui_main.set_i_cathode_slider.setValue(state["cathode_current"])
+        self.ui_main.set_p_cathode.setValue(state["cathode_power"])
+        self.ui_main.set_p_cathode_slider.setValue(state["cathode_power"])
+        
+        self.ui_main.set_rrg.setValue("rrg_value")
+        self.ui_main.set_rrg_slider.setValue("rrg_value")
 
     def _init_main(self) -> None:
         self._init_settings()
@@ -332,6 +369,20 @@ class PLMControl(QtWidgets.QMainWindow):
         self.ui_start = start_experiment_dialog.Ui_Dialog()
         self.ui_start_dialog = QtWidgets.QDialog()
         self.ui_start.setupUi(self.ui_start_dialog)
+
+        if os.path.isfile('state.json'):
+            msg = QtWidgets.QMessageBox()
+            msg.setText('Похоже, предыдущий сеанс закончился некорректно. Вы хотите восстановить предыдущее состояние программы?')
+            msg.setWindowTitle('Подтверждение')
+            msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+            return_value = msg.exec()
+            if return_value == QtWidgets.QMessageBox.Ok:
+                self.restore_state()
+            if return_value == QtWidgets.QMessageBox.Cancel:
+                pass
+        else:
+            f = open('state.json', 'w')
+            f.close()
 
     def start_main_window(self):
         self.ui_start_dialog.close()
@@ -569,6 +620,9 @@ class PLMControl(QtWidgets.QMainWindow):
         pressure_1 = instruments['pressure_1']
         pressure_2 = instruments['pressure_2']
         pressure_3 = instruments['pressure_3']
+
+        with open("state.json", "w") as f:
+            json.dump(instruments, f, indent=4)
 
         self.ui_main.u_sample_actual.setText(str(sample_voltage))
         self.ui_main.i_sample_actual.setText(str(sample_current))
@@ -990,3 +1044,15 @@ class PLMControl(QtWidgets.QMainWindow):
         self.pressure_1.set_gas(gas)
         self.pressure_2.set_gas(gas)
         self.pressure_3.set_gas(gas)
+
+    def closeEvent(self, event):
+        msg = QtWidgets.QMessageBox()
+        msg.setText('Закрыть окно? Состояние программы не будет сохранено')
+        msg.setWindowTitle('Подтверждение')
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+        return_value = msg.exec()
+        if return_value == QtWidgets.QMessageBox.Ok:
+            print('OK')
+            os.remove('state.json')
+        if return_value == QtWidgets.QMessageBox.Cancel:
+            event.ignore()

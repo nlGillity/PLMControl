@@ -75,9 +75,9 @@ class SCPIInstrument:
             try:
                 return round(float(self._query('MEASURE:VOLTAGE?').strip('\x00')), 2)
             except:
-                return 0.0
+                return 0
         else:
-            return 0.0
+            return 0
 
     def get_current(self):
         """
@@ -87,9 +87,9 @@ class SCPIInstrument:
             try:
                 return round(float(self._query('MEASURE:CURRENT?').strip('\x00')), 2)
             except:
-                return 0.0
+                return 0
         else:
-            return 0.0
+            return 0
 
     def get_power(self):
         """
@@ -99,9 +99,9 @@ class SCPIInstrument:
             try:
                 return round(float(self._query('MEASURE:POWER?').strip('\x00')), 2)
             except:
-                return 0.0
+                return 0
         else:
-            return 0.0
+            return 0
 
     def get_identification(self):
         """
